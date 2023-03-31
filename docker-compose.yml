@@ -1,0 +1,46 @@
+version: "3"
+services:
+  zookeeper-source:
+    image: 'bitnami/zookeeper:latest'
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+  zookeeper-target:
+    image: 'bitnami/zookeeper:latest'
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+  zookeeper-honeypod:
+    image: 'bitnami/zookeeper:latest'
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+  source:
+    image: 'bitnami/kafka:latest'
+    ports:
+      - '9092:9092'
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://source:9092
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper-source:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    depends_on:
+      - zookeeper-source
+  target:
+    image: 'bitnami/kafka:latest'
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://target:9092
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper-target:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    depends_on:
+      - zookeeper-target
+  honeypod:
+    image: 'bitnami/kafka:latest'
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://honeypod:9092
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper-honeypod:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    depends_on:
+      - zookeeper-honeypod
